@@ -1,0 +1,43 @@
+.container {
+  padding-top: 20px;
+  max-width: 1000px;
+}
+
+.portswitcher-form form {
+  float: left;
+  width: 50%;
+  padding: 10px 10px;
+}
+
+.ps-status {
+  margin-left: 50%;
+  padding: 10px 20px 5px;
+}
+
+.ps-status div {
+  /* background-color: #fb4934; */
+  color: #fb4934;
+}
+
+hr {
+  margin-left: 50%;
+  padding: 10px 0;
+}
+
+.toggling-list {
+  margin-left: 50%;
+  padding: 10px 20px 5px;
+}
+
+.toggling-list li {
+  padding: 5px 0;
+}
+
+/* .toggling-list li:last-child { */
+/*   /1* background-color: #8ec07c; *1/ */
+/*   color: #007f00; */
+/* } */
+
+.submit-controls {
+  padding: 15px 0;
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="PortSwitcher">
+  <meta name="author" content="horseinthesky">
+  <title>PortSwitcher</title>
+  <link href="{{ url_for('static', path='/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', path='/css/base.css') }}" rel="stylesheet">
+</head>
+
+<body>
+  <main role="main" class="container">
+    <div class="portswitcher-form">
+      <h4>PortSwitcher</h4>
+      <form method="POST">
+        {{ form }}
+        <div class="submit-controls">
+          <button type="submit" class="btn btn-primary">Switch</button>
+        </div>
+      </form>
+    </div>
+    {% if ps_status %}
+    <div class="ps-status">
+      <h6>Error</h6>
+      <div>
+        {{ ps_status }}
+      </div>
+    </div>
+    {% if ps_status and togglings %}
+    <hr/>
+    {% endif %}
+    {% endif %}
+    {% if togglings %}
+    <div class="toggling-list">
+      <h6>Last 5 togglings</h6>
+      <div>
+        <ul>
+          {% for toggling in togglings %}
+          <li>{{ toggling }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% if request.method == 'POST' and not ps_status and not form.errors %}
+      <style>
+        li:last-child {
+          color: #007f00;
+        }
+      </style>
+      {% endif %}
+    </div>
+    {% endif %}
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', path='js/bootstrap.min.js') }}"></script>
+</body>
+
+</html>
