@@ -1,0 +1,30 @@
+site_name: napi
+
+repo_name: horseinthesky/napi
+repo_url: https://github.com/horseinthesky/napi
+
+plugins:
+  - search
+  - mkdocstrings
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: yellow
+      accent: yellow
+      toggle:
+        icon: material/lightbulb-outline
+        name: "Switch to dark mode"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: yellow
+      accent: yellow
+      toggle:
+        icon: material/lightbulb
+        name: "Switch to light mode"
+  features:
+    - search.suggest
+    - search.highlight
+    - content.tabs.link

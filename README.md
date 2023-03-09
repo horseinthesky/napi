@@ -14,11 +14,12 @@ The main idea of the project is to show how this situation might be solved by es
 
 ## ✨ Features
 
-- 💪 High level vendor agnostic access to network devices
+- 💪 Easy, secure, and vendor agnostic access your network
 - 🚀 Async execution for improved performance powered by [FastAPI](https://fastapi.tiangolo.com/)
 - 📊 Multicore load balancing via [Uvicorn](https://www.uvicorn.org/) ASGI web server
 - 🔒 Token based authorization
-- 📚 Beautiful and comprehensive docs via [Swagger](https://swagger.io/) and [Redoc](https://redocly.com/)
+- 📚 Comprehensive API reference via [Swagger](https://swagger.io/) and [Redoc](https://redocly.com/)
+- 🎨 Beautiful documentation via [MkDocs](https://www.mkdocs.org/) with [material theme](https://squidfunk.github.io/mkdocs-material/).
 - 🛠️ Configurable via `.env` files and `env` variables
 - 💾 Completely stateless
 

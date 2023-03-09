@@ -22,6 +22,12 @@ python-multipart = "^0.0.6"
 bootstrap4 = "^0.1.0"
 
 
+[tool.poetry.group.dev.dependencies]
+mkdocs = "^1.4.2"
+mkdocstrings = "^0.20.0"
+mkdocstrings-python = "^0.8.3"
+mkdocs-material = "^9.1.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
