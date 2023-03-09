@@ -1,4 +1,5 @@
 # napi
+
 `napi` is a concept HTTP controller for network devices.
 
 ## 💡 Motivation
@@ -24,6 +25,7 @@ The main idea of the project is to show how this situation might be solved by es
 ## 🔎 Internals
 
 `napi` provides three main building blocks to solve any task you might imagine:
+
 - token authorization
 - inventory system
 - network drivers
@@ -32,7 +34,22 @@ The main idea of the project is to show how this situation might be solved by es
 
 Authorization module uses static tokens but you can easily extend it to support [JWT](https://jwt.io/) or [PASETO](https://paseto.io/).
 
-`auth.yml` has one user `user1` with a `token` token to show the structure of user permissions.
+Hash is stored in `auth.yml` file to authorize the corresponding user.
+
+```
+groups:
+  group1: &group1
+    permissions:
+      - portswitcher
+      - macgrabber
+
+users:
+  3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0:
+    name: user1
+    <<: *group1
+```
+
+Example file includes one user `user1` with a `token` token to demonstrate the structure of user permissions.
 
 You can generate new user tokens with this code snippet:
 
@@ -48,7 +65,7 @@ In [5]: hashlib.sha256(token.encode('utf-8')).hexdigest()
 Out[5]: '95fabfb1713ea5abb54767b2bea0fe49bbd29faad610df7c58c796408a29e7a5'
 ```
 
-Hash is stored in `auth.yml` file to authorize the corresponding user.
+And assign permissions as in the example above.
 
 ### 📋 Inventory
 
@@ -59,17 +76,25 @@ As an example it has `Device`, `Interface` and `SupportsGetDeviceInterface` abst
 ### 🔌 Drivers
 
 Drivers module provides drivers to interact with network devices via CLI or [NETCONF](https://en.wikipedia.org/wiki/NETCONF) protocol:
+
 - CLI driver is powered by [Carl Montanari](https://www.montanari.io/)'s amazing [scrapli](https://github.com/carlmontanari/scrapli) library.
 - NETCONF driver is powered by robust [asyncssh](https://asyncssh.readthedocs.io/en/latest/) library with in-house wrapper to make in NETCONF ready.
 
 ## 💻 Endpoints
 
 As proof of concept `napi` provides a few endpoints:
+
 - `ping` - simple availability endpoint to put under your load balancer or k8s health check
 - `portswitcher` - reconfigures DC fabric leaf switch downlinks (server-faced interfaces)
 - `macgrabber` - gets switch MAC addresses
 
 ### Ping
+
+Example:
+
+```
+xh get localhost:8080/ping
+```
 
 Always responds with:
 
@@ -82,11 +107,17 @@ Always responds with:
 
 ### Portswitcher
 
-`portswitcher` is an example of how you can provide an easy vendor agnostic way for your related teams to get/change a network device configuration (L2 interfaces is this case).
+`portswitcher` is an example of how you can provide an easy vendor agnostic way for your related teams to get/set a network device configuration (L2 interface is this case).
 
-It works the same way with blackbox and whitebox switches. Example supports Huawei CE (Cloud Engine) switches and Nvidia Mellanox switches.
+It works the same way with **blackbox** and **whitebox** switches. Example supports [Huawei CE (Cloud Engine)](https://e.huawei.com/ru/products/enterprise-networking/switches/data-center-switches) switches and [Nvidia Mellanox switches](https://www.nvidia.com/en-us/networking/ethernet-switching/).
 
 #### GET
+
+Example:
+
+```
+xh get localhost:8080/api/portswitcher switch=leaf1 interface=GE1/0/5 --bearer token
+```
 
 It expects input data describing the network device interface:
 
@@ -115,6 +146,11 @@ These `prod`/`setup` states are the combination of interface mode (access/trunk)
 
 #### POST
 
+Example:
+```
+xh post localhost:8080/api/portswitcher switch=leaf1 interface=GE1/0/5 state=prod --bearer token
+```
+
 In the same way POST expects data describing the interface plus the desired "state":
 
 ```
@@ -139,6 +175,45 @@ The response is just the same as for GET:
 }
 ```
 
+### Macgrabber
+
+The same goes for `macgrabber` which is an example endpoint that provides an easy vendor agnostic way for your related teams to get/set MAC-addresses from a switch. **No difference** blackbox or whitebox.
+
+#### GET
+
+Example:
+
+```
+xh get localhost:8080/api/macgrabber switch=leaf2 --bearer token
+```
+
+It expects input data of switch name and (optional) VLAN number:
+
+```
+{
+  "switch": "string",
+  "vlan": "string"
+}
+```
+
+And returns a list of MAC-address info:
+
+```
+{
+  "code": 0,
+  "status": "ok",
+  "result": {
+    "switch": "string",
+    "macs": [
+      {
+        "vlan": "string",
+        "mac": "string",
+        "interface": "string"
+      }
+    ]
+  }
+}
+```
 
 ## 📈 Usage
 
@@ -165,6 +240,7 @@ make run
 Configuration is managed by [pydantic](https://docs.pydantic.dev/)'s [Settings](https://docs.pydantic.dev/usage/settings/) module.
 
 You must have `.env` file to setup the following settings:
+
 - **nv_api_url** (`NV_API_URL` env var) - an address of Netbox API
 - **tenants** (`TENANTS` env var) - comma separated list of tenants network devices belong to in SoT
 - **domains** (`DOMAINS` env var) - comma separated list of domains network devices has their fqnds from
