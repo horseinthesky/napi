@@ -22,63 +22,87 @@ The main idea of the project is to show how this situation might be solved by es
 - 🛠️ Configurable via `.env` files and `env` variables
 - 💾 Completely stateless
 
-## 🔎 Internals
+## 📈 Usage
 
-`napi` provides three main building blocks to solve any task you might imagine:
+### ⚡️ Requirements
 
-- token authorization
-- inventory system
-- network drivers
+Before running `napi` you need to setup source of thuth (SoT) - an inventory system. By default it has only [Netbox](https://docs.netbox.dev/en/stable/) support build in.
 
-### 🔒 Authorization
+You can set it up on your own installation or use a [community solution](https://github.com/netbox-community/netbox-docker).
 
-Authorization module uses static tokens but you can easily extend it to support [JWT](https://jwt.io/) or [PASETO](https://paseto.io/).
-
-Hash is stored in `auth.yml` file to authorize the corresponding user.
+Don't forget to change view permissions to get full read access without a token by setting:
 
 ```
-groups:
-  group1: &group1
-    permissions:
-      - portswitcher
-      - macgrabber
-
-users:
-  3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0:
-    name: user1
-    <<: *group1
+EXEMPT_VIEW_PERMISSIONS = ['*']
 ```
 
-Example file includes one user `user1` with a `token` token to demonstrate the structure of user permissions.
+in `configuration/configuration.py` file.
 
-You can generate new user tokens with this code snippet:
+And then run:
 
 ```
-In [1]: import secrets, hashlib
-
-In [2]: token = secrets.token_hex(16)
-
-In [4]: token
-Out[4]: 'bf3ae64635504b9b4ce71a6c7ab2bc8c'
-
-In [5]: hashlib.sha256(token.encode('utf-8')).hexdigest()
-Out[5]: '95fabfb1713ea5abb54767b2bea0fe49bbd29faad610df7c58c796408a29e7a5'
+docker-compose up -d
 ```
 
-And assign permissions as in the example above.
+After Netbox is started load example DB from `examples/db_dump.sql.gz` with the following command:
 
-### 📋 Inventory
+```
+gunzip -c db_dump.sql.gz | docker-compose exec -T postgres sh -c 'psql -U $POSTGRES_USER $POSTGRES_DB'
+```
 
-Inventory module is designed to work with SoT (Source of Truth) systems. By default it has [Netbox](https://docs.netbox.dev/en/stable/) support. You can find an example DB for it in an `examples` folder.
+Now you are ready to try it out.
 
-As an example it has `Device`, `Interface` and `SupportsGetDeviceInterface` abstractions to make support of other systems a breese.
+### 📚 Clone
 
-### 🔌 Drivers
+To try it out clone the repo:
 
-Drivers module provides drivers to interact with network devices via CLI or [NETCONF](https://en.wikipedia.org/wiki/NETCONF) protocol:
+```
+git clone https://github.com/horseinthesky/napi.git
+```
 
-- CLI driver is powered by [Carl Montanari](https://www.montanari.io/)'s amazing [scrapli](https://github.com/carlmontanari/scrapli) library.
-- NETCONF driver is powered by robust [asyncssh](https://asyncssh.readthedocs.io/en/latest/) library with in-house wrapper to make in NETCONF ready.
+Next install dependencies ([poetry](https://python-poetry.org/) is required):
+
+```bash
+make setup
+```
+
+### 🛠️ Configuration
+
+Configuration is managed by [pydantic](https://docs.pydantic.dev/)'s [Settings](https://docs.pydantic.dev/usage/settings/) module.
+
+You must have `.env` file to setup the following settings:
+
+- **nv_api_url** (`NV_API_URL` env var) - an address of Netbox API
+- **tenants** (`TENANTS` env var) - comma separated list of tenants network devices belong to in SoT
+- **domains** (`DOMAINS` env var) - comma separated list of domains network devices has their fqnds from
+- **endpoints** (`ENDPOINTS` env var) - comma separated list of endpoints to use in the environment
+
+Each setting must be prefixed with the corresponding "environment" value. Both in `.env` file AND as env variable.
+
+By default `napi` runs in `prod` environment. It is controlled by `ENV` env variable.
+
+Here is an example `.env` file from the repo:
+
+```
+prod_nb_api_url=http://localhost:8000/api
+prod_tenants=production
+prod_domains=local
+prod_endpoints=portswitcher,macgrabber
+```
+
+### 🚀 Run
+
+Finally run `napi` server:
+
+```bash
+make run
+```
+
+By default it runs on port **8080** with several workers (number calculated via `nproc`).
+
+## Swagger
+
+Before moving to further check out swagger docs at `localhost:8080/docs`.
 
 ## 💻 Endpoints
 
@@ -147,6 +171,7 @@ These `prod`/`setup` states are the combination of interface mode (access/trunk)
 #### POST
 
 Example:
+
 ```
 xh post localhost:8080/api/portswitcher switch=leaf1 interface=GE1/0/5 state=prod --bearer token
 ```
@@ -215,46 +240,60 @@ And returns a list of MAC-address info:
 }
 ```
 
-## 📈 Usage
+## 🔎 Internals
 
-To try it out clone the repo:
+`napi` provides three main building blocks to solve any task you might imagine:
 
-```
-git clone https://github.com/horseinthesky/napi.git
-```
+- token authorization
+- inventory system
+- network drivers
 
-Next install dependencies ([poetry](https://python-poetry.org/) is required):
+### 🔒 Authorization
 
-```bash
-make setup
-```
+Authorization module uses static tokens but you can easily extend it to support [JWT](https://jwt.io/) or [PASETO](https://paseto.io/).
 
-And finally run `napi` server:
-
-```bash
-make run
-```
-
-### 🛠️ Configuration
-
-Configuration is managed by [pydantic](https://docs.pydantic.dev/)'s [Settings](https://docs.pydantic.dev/usage/settings/) module.
-
-You must have `.env` file to setup the following settings:
-
-- **nv_api_url** (`NV_API_URL` env var) - an address of Netbox API
-- **tenants** (`TENANTS` env var) - comma separated list of tenants network devices belong to in SoT
-- **domains** (`DOMAINS` env var) - comma separated list of domains network devices has their fqnds from
-- **endpoints** (`ENDPOINTS` env var) - comma separated list of endpoints to use in the environment
-
-Each setting must be prefixed with the corresponding "environment" value. Both in `.env` file AND as env variable.
-
-By default `napi` runs in `prod` environment. It is controlled by `ENV` env variable.
-
-Here is an example `.env` file from the repo:
+Hash is stored in `auth.yml` file to authorize the corresponding user.
 
 ```
-prod_nb_api_url=http://localhost:8000/api
-prod_tenants=production
-prod_domains=local
-prod_endpoints=portswitcher,macgrabber
+groups:
+  group1: &group1
+    permissions:
+      - portswitcher
+      - macgrabber
+
+users:
+  3c469e9d6c5875d37a43f353d4f88e61fcf812c66eee3457465a40b0da4153e0:
+    name: user1
+    <<: *group1
 ```
+
+Example file includes one user `user1` with a `token` token to demonstrate the structure of user permissions.
+
+You can generate new user tokens with this code snippet:
+
+```
+In [1]: import secrets, hashlib
+
+In [2]: token = secrets.token_hex(16)
+
+In [4]: token
+Out[4]: 'bf3ae64635504b9b4ce71a6c7ab2bc8c'
+
+In [5]: hashlib.sha256(token.encode('utf-8')).hexdigest()
+Out[5]: '95fabfb1713ea5abb54767b2bea0fe49bbd29faad610df7c58c796408a29e7a5'
+```
+
+And assign permissions as in the example above.
+
+### 📋 Inventory
+
+Inventory module is designed to work with any SoT (Source of Truth) system.
+
+As an example, it has `Device`, `Interface`, `Vlans`, and `SupportsGetDeviceInterface` abstractions to make the addition of new systems a breeze:
+
+### 🔌 Drivers
+
+Drivers module provides drivers to interact with network devices via CLI or [NETCONF](https://en.wikipedia.org/wiki/NETCONF) protocol:
+
+- CLI driver is powered by [Carl Montanari](https://www.montanari.io/)'s amazing [scrapli](https://github.com/carlmontanari/scrapli) library.
+- NETCONF driver is powered by robust [asyncssh](https://asyncssh.readthedocs.io/en/latest/) library with in-house wrapper to make in NETCONF ready.
