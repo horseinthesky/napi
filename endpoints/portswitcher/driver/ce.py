@@ -6,7 +6,28 @@ from .exceptions import ConfigurationError
 
 
 class CEDriver(NetconfDriver):
+    """
+    CEDriver is the portswitcher API driver class for NETCONF-enabled devices.
+
+    It provides the network device interaction for this API.
+    """
+
     def __init__(self, device: Device, interface: Interface) -> None:
+        """
+        The constructor method.
+
+        Sets "state" mapping - what L2 mode and VLANs are valid for what "state"
+
+        Args:
+            device: inventory device object has all necessary info about the device
+            interface: inventory interface object has all necessary info about the interface
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         super().__init__(device.ip or device.fqdn)
 
         self.device = device
@@ -27,10 +48,34 @@ class CEDriver(NetconfDriver):
         }
 
     async def set_state(self, desired_state: str) -> None:
+        """
+        Configure the device interface to the desired state
+
+        Args:
+            desired_state: desired stare - "prod" or "setup"
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         config = InterfaceTree(interfaces=[self.config_map[desired_state]])
         await self.edit_config(config=config)
 
     async def get_state(self) -> str:
+        """
+        Get the device real interface state from the network device
+
+        Args:
+            None
+
+        Returns:
+            str: the network device interface state - "prod"/"setup"/"unknown"
+
+        Raises:
+            ConfigurationError: the real device does not has an interface it has in the inventory
+        """
         filter_ = InterfaceTree(
             interfaces=[
                 L2Interface(name=self.interface.name).empty(),

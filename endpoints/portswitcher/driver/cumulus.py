@@ -9,7 +9,27 @@ from .exceptions import ConfigurationError
 
 
 class CumulusDriver(CLIDriver):
+    """
+    CEDriver is the portswitcher API driver class for CLI-only devices.
+
+    It provides the network device interaction for this API.
+    """
     def __init__(self, device: Device, interface: Interface) -> None:
+        """
+        The constructor method.
+
+        Sets "state" mapping - what L2 mode and VLANs are valid for what "state"
+
+        Args:
+            device: inventory device object has all necessary info about the device
+            interface: inventory interface object has all necessary info about the interface
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         super().__init__(device.ip or device.fqdn, device.vendor)
 
         self.device = device
@@ -30,6 +50,19 @@ class CumulusDriver(CLIDriver):
         }
 
     async def _get_interface_vlans(self) -> dict[str, Any]:
+        """
+        Actually sends the commands for get_state/set_state methods
+        to avoid code duplication.
+
+        Args:
+            None
+
+        Returns:
+            dict[str, Any]: any JSON response converted to native python object
+
+        Raises:
+            ValueError: the device response is an empty string
+        """
         command = f"bridge -j vlan show dev {self.interface.name}"
 
         intf_state_json = await self.send_command(command)
@@ -41,6 +74,18 @@ class CumulusDriver(CLIDriver):
         return intf_info[0]
 
     async def set_state(self, desired_state: str) -> None:
+        """
+        Configure the device interface to the desired state
+
+        Args:
+            desired_state: desired stare - "prod" or "setup"
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         try:
             actual_interface_state = await self._get_interface_vlans()
         except ValueError:
@@ -58,6 +103,18 @@ class CumulusDriver(CLIDriver):
             )
 
     async def get_state(self) -> str:
+        """
+        Get the device real interface state from the network device
+
+        Args:
+            None
+
+        Returns:
+            str: the network device interface state - "prod"/"setup"/"unknown"
+
+        Raises:
+            ConfigurationError: the real device does not has an interface it has in the inventory
+        """
         try:
             actual_interface_state = await self._get_interface_vlans()
         except ValueError:

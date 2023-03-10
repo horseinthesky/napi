@@ -19,18 +19,78 @@ asdictify = partial(transform, attr="as_dict")
 
 @dataclass
 class NetconfDriver:
+    """
+    NetconfDriver is the base async driver class to inherit API drivers from.
+
+    It provides standard NETCONF protocol get/get_config/edit_config methods. It is best for API
+    driver to inherit from NetconfDriver and use its methods as part of technical implementation
+    of API business logic.
+
+    Args:
+        host: host ip/name to connect to
+        timeout: SSH connection timeout
+        capabilities: NETCONF capabilities
+
+    Returns:
+        None
+
+    Raises:
+        N/A
+    """
+
     host: str
     timeout: int = 5
     capabilities: list[str] = field(default_factory=lambda: rpcs.capabilities)
 
     async def __aenter__(self) -> Self:
+        """
+        Enter method for context manager. Opens NETCONF connection.
+
+        Args:
+            N/A
+
+        Returns:
+            Self: an instance of NetconfDriver
+
+        Raises:
+            N/A
+        """
         await self.connect()
         return self
 
     async def __aexit__(self, *exception) -> None:
+        """
+        Exit method to cleanup for context manager. Closes NETCONF connection.
+
+        Args:
+            exception_type: exception type being raised
+            exception_value: message from exception being raised
+            traceback: traceback from exception being raised
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         self.disconnect()
 
     async def connect(self) -> None:
+        """
+        Open NETCONF connection. Automatically sends hello RPC after the connection is open
+
+        Args:
+            N/A
+
+        Returns:
+            None
+
+        Raises:
+            Timeout: timeout is exceeded
+            ConnectionError: failed to establish connection
+            AuthError: failed to authenticate on network device
+            Exception: any unexpected error
+        """
         try:
             self._connection = await asyncio.wait_for(
                 asyncssh.connect(
@@ -75,15 +135,54 @@ class NetconfDriver:
         await asyncio.sleep(0.01)
 
     def disconnect(self) -> None:
+        """
+        Close NETCONF connection
+
+        Args:
+            N/A
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         self._write(rpcs.close)
         self._connection.close()
 
     def _hello(self) -> None:
+        """
+        Send NETCONF hello RPC to the device
+
+        Args:
+            N/A
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         payload: dict[str, Any] = deepcopy(rpcs.hello)
         payload["hello"]["capabilities"]["capability"] = self.capabilities
         self._write(payload)
 
     async def _read(self) -> dict[str, Any]:
+        """
+        Read NETCONF RPC reply from channel. Reads from channel until "]]>]]>" sequence is found
+
+        Args:
+            N/A
+
+        Returns:
+            dict[str, Any]: any XML response converted to native python object
+
+        Raises:
+            CommitError: the device is not able to save configuration due to another
+                save job is running
+            RPCError: the device responded with an RPC error
+                Probably due to invalid RPC sent
+        """
         rpc_reply = await self._reader.readuntil("]]>]]>")
         logger.debug(f"_read {rpc_reply}")
 
@@ -107,7 +206,19 @@ class NetconfDriver:
 
         return rpc_reply_data
 
-    def _write(self, data) -> None:
+    def _write(self, data: dict[str, Any]) -> None:
+        """
+        Send NETCONF RPC to channel. Converts python object to XML and sends it as an RPC XML payload
+
+        Args:
+            data: arbitrary data to convert to XML
+
+        Returns:
+            None
+
+        Raises:
+            N/A
+        """
         xml_data = xmltodict.unparse(data, full_document=False, pretty=True) + "]]>]]>"
         logger.debug(f"_write {xml_data}")
 
@@ -115,6 +226,18 @@ class NetconfDriver:
 
     @asdictify(param="filter_")
     async def get(self, *, filter_: dict[str, Any] | None = None) -> dict[str, Any]:
+        """
+        High level NETCONF get method
+
+        Args:
+            filter_: arbitrary data to convert to XML
+
+        Returns:
+            dict[str, Any]: any XML response converted to native python object
+
+        Raises:
+            N/A
+        """
         payload: dict[str, Any] = deepcopy(rpcs.get)
 
         if filter_ is not None:
@@ -130,6 +253,18 @@ class NetconfDriver:
     async def get_config(
         self, *, source="running", filter_: dict[str, Any] | None = None
     ) -> dict[str, Any]:
+        """
+        High level NETCONF get_config method
+
+        Args:
+            filter_: arbitrary data to convert to XML
+
+        Returns:
+            dict[str, Any]: any XML response converted to native python object
+
+        Raises:
+            N/A
+        """
         payload: dict[str, Any] = deepcopy(rpcs.get_config)
         payload["rpc"]["get-config"]["source"] = {source: None}
         if filter_ is not None:
@@ -143,6 +278,19 @@ class NetconfDriver:
 
     @asdictify(param="config")
     async def edit_config(self, *, target="running", config: dict[str, Any]) -> dict[str, Any]:
+        """
+        High level NETCONF edit_config method
+
+        Args:
+            target: a target configuration database - "running" or "candidate"
+            config: arbitrary data to convert to XML
+
+        Returns:
+            dict[str, Any]: any XML response converted to native python object
+
+        Raises:
+            N/A
+        """
         payload: dict[str, Any] = deepcopy(rpcs.edit_config)
         payload["rpc"]["edit-config"] = {
             "target": {target: None},

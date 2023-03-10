@@ -23,6 +23,16 @@ The main idea of the project is to show how this situation might be solved by es
 - 🛠️ Configurable via `.env` files and `env` variables
 - 💾 Completely stateless
 
+## Docs
+
+Run the following command to run `mkdocs` server:
+
+```
+make docs
+```
+
+Then open `http://localhost:9000` to read it.
+
 ## 📈 Usage
 
 ### ⚡️ Requirements

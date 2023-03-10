@@ -28,3 +28,10 @@ theme:
     - search.suggest
     - search.highlight
     - content.tabs.link
+
+nav:
+  - Overview: index.md
+  - usage.md
+  - Drivers:
+    - NETCONF: drivers/netconf.md
+    - drivers/cli.md
