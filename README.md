@@ -19,11 +19,11 @@ The main idea of the project is to show how this situation might be solved by es
 - 📊 Multicore load balancing via [Uvicorn](https://www.uvicorn.org/) ASGI web server
 - 🔒 Token based authorization
 - 📚 Comprehensive API reference via [Swagger](https://swagger.io/) and [Redoc](https://redocly.com/)
-- 🎨 Beautiful documentation via [MkDocs](https://www.mkdocs.org/) with [material theme](https://squidfunk.github.io/mkdocs-material/).
+- 📁 Beautiful documentation via [MkDocs](https://www.mkdocs.org/) with [material theme](https://squidfunk.github.io/mkdocs-material/).
 - 🛠️ Configurable via `.env` files and `env` variables
 - 💾 Completely stateless
 
-## Docs
+## 📁 Docs
 
 Run the following command to run `mkdocs` server:
 
