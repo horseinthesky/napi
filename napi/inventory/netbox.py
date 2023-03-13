@@ -23,6 +23,9 @@ _translations = str.maketrans(
 
 @dataclass
 class Netbox:
+    """
+    Netbox gets network devices information from Netbox.
+    """
     api_url: str = settings.nb_api_url
 
     def __post_init__(self):

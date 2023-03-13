@@ -58,7 +58,7 @@ class NetconfDriver:
         await self.connect()
         return self
 
-    async def __aexit__(self, *exception) -> None:
+    async def __aexit__(self, *exc) -> None:
         """
         Exit method to cleanup for context manager. Closes NETCONF connection.
 

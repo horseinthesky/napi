@@ -31,7 +31,7 @@ Run the following command to run `mkdocs` server:
 make docs
 ```
 
-Then open `http://localhost:9000` to read it.
+Then open `http://localhost:9000` for more details..
 
 ## 📈 Usage
 
@@ -113,7 +113,7 @@ By default it runs on port **8080** with several workers (number calculated via 
 
 ## Swagger
 
-Before moving to further check out swagger docs at `localhost:8080/docs`.
+Before moving to further check out API documentation provided automatically by `swagger` at `localhost:8080/docs`.
 
 ## 💻 Endpoints
 

@@ -31,7 +31,9 @@ theme:
 
 nav:
   - Overview: index.md
-  - usage.md
   - Drivers:
     - NETCONF: drivers/netconf.md
     - drivers/cli.md
+  - Inventory:
+    - inventory/models.md
+    - inventory/netbox.md
