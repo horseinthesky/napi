@@ -14,4 +14,7 @@ run:
 docs:
 	mkdocs serve --dev-addr localhost:9000
 
-.PHONY: setup run docs
+docker:
+	docker build -t $$(poetry version | awk '{print $$1":"$$NF}') .
+
+.PHONY: setup run docs docker

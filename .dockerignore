@@ -1,0 +1,14 @@
+docs
+examples
+mkdocs.yml
+Makefile
+.git
+.gitignore
+*.log
+.venv
+venv
+Dockerfile
+.dockerignore
+LICENSE
+README.md
+poetry.lock

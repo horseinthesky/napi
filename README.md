@@ -17,6 +17,7 @@ The main idea of the project is to show how this situation might be solved by es
 - 💪 Easy, secure, and vendor agnostic access your network
 - 🚀 Async execution for improved performance powered by [FastAPI](https://fastapi.tiangolo.com/)
 - 📊 Multicore load balancing via [Uvicorn](https://www.uvicorn.org/) ASGI web server
+- 🐳 [Docker](https://www.docker.com/) ready
 - 🔒 Token based authorization
 - 📚 Comprehensive API reference via [Swagger](https://swagger.io/) and [Redoc](https://redocly.com/)
 - 📁 Beautiful documentation via [MkDocs](https://www.mkdocs.org/) with [material theme](https://squidfunk.github.io/mkdocs-material/).
@@ -47,7 +48,7 @@ Don't forget to change view permissions to get full read access without a token 
 EXEMPT_VIEW_PERMISSIONS = ['*']
 ```
 
-in `configuration/configuration.py` file.
+in the `configuration/configuration.py` file.
 
 And then run:
 
