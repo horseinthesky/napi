@@ -20,7 +20,7 @@ class Settings(BaseSettings):
         @classmethod
         def parse_env_var(cls, field_name: str, raw_val: str) -> Any:
             if field_name in ["tenants", "domains", "endpoints"]:
-                return [val for val in raw_val.split(",")]
+                return raw_val.split(",")
             return cls.json_loads(raw_val)
 
 

@@ -58,7 +58,7 @@ class NetconfDriver:
         await self.connect()
         return self
 
-    async def __aexit__(self, *exc) -> None:
+    async def __aexit__(self, *_) -> None:
         """
         Exit method to cleanup for context manager. Closes NETCONF connection.
 
@@ -108,19 +108,19 @@ class NetconfDriver:
             )
         except asyncio.exceptions.TimeoutError as e:
             logger.critical(repr(e), exc_info=True)
-            raise exceptions.Timeout(f"Connection to {self.host} timed out")
+            raise exceptions.Timeout(f"Connection to {self.host} timed out") from None
         except (asyncssh.misc.KeyExchangeFailed, asyncssh.misc.ProtocolError) as e:
             logger.critical(repr(e), exc_info=True)
-            raise exceptions.ConnectionError(f"{str(e)}")
+            raise exceptions.ConnectionError(f"{str(e)}") from None
         except asyncssh.misc.ConnectionLost as e:
             logger.critical(repr(e), exc_info=True)
-            raise exceptions.ConnectionError(f"Lost connection to {self.host}")
+            raise exceptions.ConnectionError(f"Lost connection to {self.host}") from None
         except ConnectionRefusedError as e:
             logger.critical(repr(e), exc_info=True)
-            raise exceptions.ConnectionError(f"Failed to connect to {self.host}")
+            raise exceptions.ConnectionError(f"Failed to connect to {self.host}") from None
         except asyncssh.misc.PermissionDenied as e:
             logger.critical(repr(e), exc_info=True)
-            raise exceptions.AuthError(f"Failed to authenticate on {self.host}")
+            raise exceptions.AuthError(f"Failed to authenticate on {self.host}") from None
         except Exception as e:
             logger.critical(repr(e), exc_info=True)
             raise
@@ -128,7 +128,7 @@ class NetconfDriver:
         try:
             self._writer, self._reader, _ = await self._connection.open_session(subsystem="netconf")
         except asyncssh.misc.ChannelOpenError:
-            raise exceptions.ConnectionError(f"Connection to {self.host} refused by host")
+            raise exceptions.ConnectionError(f"Connection to {self.host} refused by host") from None
 
         await self._read()
         self._hello()

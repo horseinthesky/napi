@@ -1,4 +1,4 @@
-from typing import Protocol, Type, Self
+from typing import Protocol, Self, Type
 
 from .exceptions import InventoryException, inventory_http_code_map
 from .inventory import Device, Interface, Vlans
@@ -109,5 +109,4 @@ __all__ = [
     "Vlans",
     "InventoryException",
     "inventory_http_code_map",
-    "inventory_hander",
 ]
